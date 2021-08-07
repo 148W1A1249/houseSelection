@@ -10,53 +10,53 @@ function SitesContainer() {
     const [block4,setblock4] = useState("N");
     const [block5,setblock5] = useState("N");
     const [data,setdata] = useState([]);
-    const initialState = Number(window.sessionStorage.getItem("houseId")) || 5;
-    const [houseId,sethouseId] = useState(initialState);
     var sites =["House","Restaurant","Market","Parking","Tea Shop","GYM"];
     // var houseId=5;
 
     useEffect(()=>{
         async function fetchHouseData(){
             const result = await axios.get("https://607432b1066e7e0017e794b3.mockapi.io/HouseData");
-            setdata([...result.data]);
+            setdata([...result.data]);            
         }
         fetchHouseData();
     },[]);
-    useEffect(()=>{
-        window.sessionStorage.setItem("houseId",houseId);
-    },[houseId])
     
     const SubmitBlockDetails = (e)=>{
         e.preventDefault();
+        let count=0;
+        
+        data.forEach(element=>{
+            element.LaneSet.forEach(obj=>{
+                let housePresent = obj.split("-");
+                if(housePresent[0]==="House"){
+                    count++;
+                }
+            })
+        })
         let b1 = block1;
         let b2 = block2;
         let b3 = block3;
         let b4 = block4;
         let b5 = block5;
-        if(b1==="House"){           
-            b1 = block1+"-"+houseId;
-            // houseId = houseId+1;
-            sethouseId(houseId+1);
+        if(b1==="House"){ 
+            count = count + 1 ;        
+            b1 = block1+"-"+count;
         }
-        if(b2==="House"){           
-            b2 = block2+"-"+houseId;
-            // houseId = houseId+1;
-            sethouseId(houseId+1);
+        if(b2==="House"){ 
+            count = count + 1 ;          
+            b2 = block2+"-"+count;
         }
-        if(b3==="House"){           
-            b3 = block3+"-"+houseId;
-            // houseId = houseId+1;
-            sethouseId(houseId+1);
+        if(b3==="House"){  
+            count = count + 1 ;         
+            b3 = block3+"-"+count;
         }
-        if(b4==="House"){           
-            b4 = block4+"-"+houseId;
-            // houseId = houseId+1;
-            sethouseId(houseId+1);
+        if(b4==="House"){ 
+            count = count + 1 ;          
+            b4 = block4+"-"+count;
         }
-        if(b5==="House"){           
-            b5 = block5+"-"+houseId;
-            // houseId = houseId+1;
-            sethouseId(houseId+1);
+        if(b5==="House"){ 
+            count = count + 1 ;          
+            b5 = block5+"-"+count;
         }
         const blockData = [b1,b2,b3,b4,b5];
         axios({
