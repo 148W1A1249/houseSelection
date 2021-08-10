@@ -6,6 +6,7 @@ const BestHouse = ()=>{
     const [houseinfo,sethouseinfo] = useState([]);
     const [Data,setData] = useState([]);
     const [SelectHouse,setSelectHouse] = useState("");
+    const [BestHouseInfo,setBestHouseInfo] = useState("");
 
     // const [HouseName,setHouseName] = useState("");
     const [LeftSide,setLeftSide] = useState([]);
@@ -31,7 +32,7 @@ const BestHouse = ()=>{
         })
         setData(data);
     },[houseRawData])
-    const BestHouseFind = ()=>{
+    const surroundingFind = ()=>{
         Data.find((element,index)=>{
             if(element===SelectHouse){
                 let left_side_data = left_side(index-1,Data);
@@ -42,6 +43,13 @@ const BestHouse = ()=>{
             return null;
           })
     }
+    const besthouseFind = async()=>{
+        const {data} = await axios.get("https://607432b1066e7e0017e794b3.mockapi.io/HouseData");
+        const house_location=find_houses_locations(data,'House');
+        const amenity_location=find_houses_locations(data,'R');
+        const best_house=house_value(house_location,amenity_location);
+        setBestHouseInfo(best_house);
+    }
     return<>
      <NavbarComponent/>
     <div className="container mt-3">
@@ -51,7 +59,8 @@ const BestHouse = ()=>{
 
         <div className="card mt-3">
             <div className="card-body">
-               <div className="row">
+            <h3 className="text-center text-danger"><u>Check surroundings</u></h3>
+               <div className="row mt-4">                   
                    <div className="col-md-4">
                         <select className="form-control" value={SelectHouse} onChange={(e)=>{setSelectHouse(e.target.value)}}>
                                 <option value="">Select House</option>
@@ -65,8 +74,20 @@ const BestHouse = ()=>{
                         </select>
                    </div>
                    <div className="col-md-4">
-                        <button className="btn btn-danger mt-3 mt-md-0" onClick={BestHouseFind}>Check</button>
+                        <button className="btn btn-danger mt-3 mt-md-0" onClick={surroundingFind}>Check</button>
                    </div> 
+               </div>
+               <hr/>
+               <h3 className='text-left text-danger mt-3'><u>Check Best House</u></h3>
+               <div className="row mt-4">
+                   <div className="col-md-4">
+                        <button className="btn btn-danger mt-3 mt-md-0" onClick={besthouseFind}>Check</button>
+                   </div> 
+               </div >
+               <div className="mt-3">
+                    {
+                        BestHouseInfo ? <span className="text-success font-weight-bold">{BestHouseInfo}</span> : null
+                    }
                </div>
             </div>
         </div>
@@ -126,6 +147,36 @@ const BestHouse = ()=>{
 
 export default BestHouse;
 
+function find_houses_locations(data,search_string){
+    var current_house = "";
+    var house_location = {};
+    data.forEach((obj,x)=>{
+        obj.LaneSet.forEach((element,y)=>{
+            if(element.split("-")[0]===search_string){
+                current_house = element;
+                house_location[current_house] = {x,y}
+            }               
+        })
+    })
+    return house_location
+}
+function house_value(house_location,amenity_location){
+    let best_house_value = -1
+    let house;      
+    for (const key in house_location) {
+        let current_house_value = 0
+        for (const k in amenity_location) {
+            current_house_value=current_house_value+Math.abs(house_location[key].x-amenity_location[k].x)+Math.abs(house_location[key].y-amenity_location[k].y)
+        }
+        if (current_house_value<best_house_value || best_house_value===-1){
+            house=key
+            best_house_value=current_house_value
+        }
+            
+    }
+    return "Best House is: "+house;
+}
+
 function left_side(left_index,Data){
     let Left_parking_count = 0
     let Left_Market_count = 0
@@ -142,7 +193,7 @@ function left_side(left_index,Data){
     let left_teaShop_km = -1;
     
     for(let i=left_index;i>=0;i--){
-        if(Data[i]==="Tea shop"){
+        if(Data[i]==="R-Tea shop"){
             Left_teaShop_count++;
             const km = left_index - i + 1;
             if(left_teaShop_km===-1){
@@ -155,7 +206,7 @@ function left_side(left_index,Data){
                }
             }
         }
-        if(Data[i]==="Gym"){
+        if(Data[i]==="R-Gym"){
             Left_Gym_count++;
             const km = left_index - i + 1;
             if(left_Gym_km===-1){
@@ -169,7 +220,7 @@ function left_side(left_index,Data){
             }
         }
         
-        if(Data[i]==="Restaurant"){
+        if(Data[i]==="R-Restaurant"){
             Left_rest_count++;
             const km = left_index - i + 1;
             if(left_rest_km === -1){
@@ -183,7 +234,7 @@ function left_side(left_index,Data){
             }
         }
         
-        if(Data[i]==="Parking"){
+        if(Data[i]==="R-Parking"){
             Left_parking_count++;
             const km = left_index - i + 1;
             if(Left_Parking_Km===-1){
@@ -196,7 +247,7 @@ function left_side(left_index,Data){
                }
             }
         }
-        if(Data[i]==="Market"){
+        if(Data[i]==="R-Market"){
             Left_Market_count++;
             const km = left_index - i + 1;
             if(Left_Market_Km === -1){
@@ -241,7 +292,7 @@ function right_side(right_index,Data){
     let right_teaShop_km = -1;
     
     for(let i=right_index;i<Data.length;i++){
-        if(Data[i]==="Tea shop"){
+        if(Data[i]==="R-Tea shop"){
             right_teaShop_count++;
             const km = i - right_index +1;
             if(right_teaShop_km===-1){
@@ -254,7 +305,7 @@ function right_side(right_index,Data){
                }
             }
         }
-        if(Data[i]==="Gym"){
+        if(Data[i]==="R-Gym"){
             right_Gym_count++;
             const km = i - right_index +1;
             if(right_Gym_km===-1){
@@ -268,7 +319,7 @@ function right_side(right_index,Data){
             }
         }
         
-        if(Data[i]==="Restaurant"){
+        if(Data[i]==="R-Restaurant"){
             right_rest_count++;
             const km = i - right_index +1;
             if(right_rest_km===-1){
@@ -282,7 +333,7 @@ function right_side(right_index,Data){
             }
         }
         
-        if(Data[i]==="Parking"){
+        if(Data[i]==="R-Parking"){
             right_parking_count++;
             const km = i - right_index +1;
             if(right_Parking_Km===-1){
@@ -295,7 +346,7 @@ function right_side(right_index,Data){
                }
             }
         }
-        if(Data[i]==="Market"){
+        if(Data[i]==="R-Market"){
             right_Market_count++;
             const km = i - right_index +1;
             if(right_Market_Km === -1){
