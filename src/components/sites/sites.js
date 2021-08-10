@@ -10,7 +10,7 @@ function SitesContainer() {
     const [block4,setblock4] = useState("N");
     const [block5,setblock5] = useState("N");
     const [data,setdata] = useState([]);
-    var sites =["House","Restaurant","Market","Parking","Tea Shop","GYM"];
+    var sites =["House","R-Restaurant","R-Market","R-Parking","R-Tea Shop","R-GYM"];
     // var houseId=5;
 
     useEffect(()=>{
